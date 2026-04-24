@@ -23,6 +23,7 @@ public class EditActivity
                     ?? throw new Exception("Cannot find activity");
             
             mapper.Map(request.Activity, activity);
+            activity.Title = request.Activity.Title;
 
             // Console.WriteLine(JsonSerializer.Serialize(activity));
 
