@@ -1,10 +1,10 @@
 import { Grid2, Typography } from "@mui/material"
 import { useParams } from "react-router";
 import { useActivities } from "../../../lib/hooks/useActivities";
-import ActivityHeader from "./ActivityHeader";
-import ActivityInfo from "./ActivityInfo";
-import ActivityChat from "./ActivityChat";
-import ActivitySidebar from "./ActivitySidebar";
+import ActivityHeader from "./ActivityDetailsHeader";
+import ActivityInfo from "./ActivityDetailsInfo";
+import ActivityChat from "./ActivityDetailsChat";
+import ActivitySidebar from "./ActivityDetailsSidebar";
 
 export default function ActivityDetailPage() {
     const { id } = useParams();
