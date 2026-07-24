@@ -1,5 +1,7 @@
 using System;
 using System.Text.Json;
+using Application.Activities.DTOs;
+using Application.Core;
 using AutoMapper;
 using Domain;
 using MediatR;
@@ -9,25 +11,38 @@ namespace Application.Activities.Commands;
 
 public class EditActivity
 {
-    public class Command : IRequest
+    public class Command : IRequest<Result<Unit>>
     {
-        public required Activity Activity { get; set; }
+        public required EditActivityDto ActivityDto { get; set; }
     }
 
-    public class Handler(AppDbContext context, IMapper mapper) : IRequestHandler<Command>
+    public class Handler(AppDbContext context, IMapper mapper) : IRequestHandler<Command, Result<Unit>>
     {
-        public async Task Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
             var activity = await context.Activities
-                .FindAsync([request.Activity.Id], cancellationToken) 
-                    ?? throw new Exception("Cannot find activity");
+                .FindAsync([request.ActivityDto.Id], cancellationToken);
+
+            if(activity == null) return Result<Unit>.Failure("Activity not found", 404);
             
-            mapper.Map(request.Activity, activity);
-            activity.Title = request.Activity.Title;
+            // mapper.Map(request.ActivityDto, activity);
+            activity.Title = request.ActivityDto.Title;
+            activity.Description = request.ActivityDto.Description;
+            activity.Date = request.ActivityDto.Date;
+            activity.Category = request.ActivityDto.Category;
+            activity.City = request.ActivityDto.City;
+            activity.Venue = request.ActivityDto.Venue;
+            activity.Latitude = request.ActivityDto.Latitude;
+            activity.Longitude = request.ActivityDto.Longitude;
 
             // Console.WriteLine(JsonSerializer.Serialize(activity));
 
-            await context.SaveChangesAsync(cancellationToken);
+            // SaveChangesAsync 會回傳在 db 改變的狀態數量，如果為 0 表示沒有任何異動
+            var result = await context.SaveChangesAsync(cancellationToken) > 0;
+
+            if(!result) return Result<Unit>.Failure("Failed to update the activity", 400);
+
+            return Result<Unit>.Success(Unit.Value);
         }
     }
 }
