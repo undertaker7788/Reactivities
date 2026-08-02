@@ -25,17 +25,7 @@ public class EditActivity
 
             if(activity == null) return Result<Unit>.Failure("Activity not found", 404);
             
-            // mapper.Map(request.ActivityDto, activity);
-            activity.Title = request.ActivityDto.Title;
-            activity.Description = request.ActivityDto.Description;
-            activity.Date = request.ActivityDto.Date;
-            activity.Category = request.ActivityDto.Category;
-            activity.City = request.ActivityDto.City;
-            activity.Venue = request.ActivityDto.Venue;
-            activity.Latitude = request.ActivityDto.Latitude;
-            activity.Longitude = request.ActivityDto.Longitude;
-
-            // Console.WriteLine(JsonSerializer.Serialize(activity));
+            mapper.Map(request.ActivityDto, activity);
 
             // SaveChangesAsync 會回傳在 db 改變的狀態數量，如果為 0 表示沒有任何異動
             var result = await context.SaveChangesAsync(cancellationToken) > 0;

@@ -2,7 +2,11 @@ using API.Middleware;
 using Application.Activities.Queries;
 using Application.Activities.Validators;
 using Application.Core;
+using Domain;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
@@ -10,7 +14,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(opt =>
+{
+    var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+    opt.Filters.Add(new AuthorizeFilter(policy));
+});
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -35,6 +43,13 @@ builder.Services.AddAutoMapper(cfg =>
 builder.Services.AddValidatorsFromAssemblyContaining<CreateActivityValidator>();
 builder.Services.AddTransient<ExceptionMiddleware>();
 
+builder.Services.AddIdentityApiEndpoints<User>(opt =>
+{
+    opt.User.RequireUniqueEmail = true;
+})
+.AddRoles<IdentityRole>()
+.AddEntityFrameworkStores<AppDbContext>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -51,7 +66,11 @@ app.UseMiddleware<ExceptionMiddleware>();
 app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod()
     .WithOrigins("http://localhost:3000", "https://localhost:3000", "https://localhost:3001"));
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllers();
+app.MapGroup("/api").MapIdentityApi<User>();
 
 // using 區塊結束後，裡面的東西就會 Dispose
 using var scope = app.Services.CreateScope();
@@ -61,8 +80,9 @@ try
 {
     // 用 code 來觸發執行 migration，並嘗試初始化 DB 內的資料
     var context = services.GetRequiredService<AppDbContext>();
+    var userManager = services.GetRequiredService<UserManager<User>>();
     await context.Database.MigrateAsync();
-    await DbInitializer.SeedData(context);
+    await DbInitializer.SeedData(context, userManager);
 }
 catch(Exception ex)
 {

@@ -20,18 +20,7 @@ public class CreateActivity
         public async Task<Result<string>> Handle(Command request, CancellationToken cancellationToken)
         {
 
-            // var activity = mapper.Map<Activity>(request.ActivityDto);
-            Activity activity = new Activity
-            {
-                Title = request.ActivityDto.Title,
-                Description = request.ActivityDto.Title,
-                Date = request.ActivityDto.Date,
-                Category = request.ActivityDto.Category,
-                City = request.ActivityDto.City,
-                Venue = request.ActivityDto.Venue,
-                Latitude = request.ActivityDto.Latitude,
-                Longitude = request.ActivityDto.Longitude,
-            };
+            var activity = mapper.Map<Activity>(request.ActivityDto);
 
             context.Activities.Add(activity);
             
