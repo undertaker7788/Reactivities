@@ -63,7 +63,10 @@ var app = builder.Build();
 // 之後才會用到，我先註解掉
 // app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
-app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod()
+app.UseCors(options => options
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowCredentials()
     .WithOrigins("http://localhost:3000", "https://localhost:3000", "https://localhost:3001"));
 
 app.UseAuthentication();
