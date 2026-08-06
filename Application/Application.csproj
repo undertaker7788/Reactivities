@@ -22,6 +22,9 @@
     <Folder Include="Activities/Commands/" />
     <Folder Include="Activities/Queries/" />
     <Folder Include="Core/" />
+    <Folder Include="Interfaces/" />
+    <Folder Include="Profiles/" />
+    <Folder Include="Profiles/DTOs/" />
   </ItemGroup>
 
 </Project>

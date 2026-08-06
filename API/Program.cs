@@ -2,8 +2,10 @@ using API.Middleware;
 using Application.Activities.Queries;
 using Application.Activities.Validators;
 using Application.Core;
+using Application.Interfaces;
 using Domain;
 using FluentValidation;
+using Infrastructure.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -32,6 +34,8 @@ builder.Services.AddMediatR(x =>
     }
 );
 
+builder.Services.AddScoped<IUserAccessor, UserAccessor>();
+
 builder.Services.AddAutoMapper(cfg => 
     {
         cfg.LicenseKey = "eyJhbGciOiJSUzI1NiIsImtpZCI6Ikx1Y2t5UGVubnlTb2Z0d2FyZUxpY2Vuc2VLZXkvYmJiMTNhY2I1OTkwNGQ4OWI0Y2IxYzg1ZjA4OGNjZjkiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2x1Y2t5cGVubnlzb2Z0d2FyZS5jb20iLCJhdWQiOiJMdWNreVBlbm55U29mdHdhcmUiLCJleHAiOiIxODA2Mjc4NDAwIiwiaWF0IjoiMTc3NDgxMTU0MiIsImFjY291bnRfaWQiOiIwMTlkM2IwMTYzYTY3MjA5OGY5NTRiOGU4MTVkMzk0NiIsImN1c3RvbWVyX2lkIjoiY3RtXzAxa214ZzV3bXBmenN6djIwc25ybjdzNTlzIiwic3ViX2lkIjoiLSIsImVkaXRpb24iOiIwIiwidHlwZSI6IjIifQ.olYYB7cAnAzeAqGHivzjd8T40lw1j2TF3gArbYLYgB4iiEeIZUh_ifZ3zEbFr7S0h-e812JAjEBf9-uuYXaKf3xsMFqLXkkGKHCSzAIhK7n4uGk4umI43aaTEVqQK2nv3XQcbOpQsqOajjFsPmcCYhfvSj30X-2FnHZ4O99gq27S38qtM-xVcvv6pcPUhEFO-L3BvwAJN-Bj_UD5JGMJIhyco9RQOLfH7FU1QRGayAwvrnARfG7VZ4YxeZMoCMLbHOoMpYmJgJogf3vBMsNIMlrHzpK9gNgsMVR8i_PzVh8lAzwwZgn0LKeBENNHha1rKRxa3IzWwEcp_3Z3lzAsAQ";
@@ -49,6 +53,14 @@ builder.Services.AddIdentityApiEndpoints<User>(opt =>
 })
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<AppDbContext>();
+builder.Services.AddAuthorization(opt =>
+{
+    opt.AddPolicy("IsActivityHost", policy =>
+    {
+        policy.Requirements.Add(new IsHostRequirement());
+    });
+});
+builder.Services.AddTransient<IAuthorizationHandler, IsHostRequirementHandler>();
 
 var app = builder.Build();
 
