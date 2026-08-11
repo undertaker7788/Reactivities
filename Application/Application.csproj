@@ -12,6 +12,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="16.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageReference Include="MediatR" Version="14.1.0" />
@@ -24,7 +28,9 @@
     <Folder Include="Core/" />
     <Folder Include="Interfaces/" />
     <Folder Include="Profiles/" />
+    <Folder Include="Profiles/Commands/" />
     <Folder Include="Profiles/DTOs/" />
+    <Folder Include="Profiles/Queries/" />
   </ItemGroup>
 
 </Project>
