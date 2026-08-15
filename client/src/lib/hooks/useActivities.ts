@@ -17,10 +17,12 @@ export const useActivities = (id?: string) => {
         enabled: !id && location.pathname === '/activities' && !!currentUser,
         select: data => {
             return data.map(activity => {
+                const host = activity.attendees.find(x => x.id == currentUser?.id);
                 return {
                     ...activity,
                     isHost: currentUser?.id === activity.hostId,
-                    isGoing: activity.attendees.some(x => x.id === currentUser?.id)
+                    isGoing: activity.attendees.some(x => x.id === currentUser?.id),
+                    hostImageUrl: host?.imageUrl
                 }
             })
         }
@@ -34,10 +36,12 @@ export const useActivities = (id?: string) => {
         },
         enabled: !!id && !!currentUser,
         select: data => {
+            const host = data.attendees.find(x => x.id == currentUser?.id);
             return {
                 ...data,
                 isHost: currentUser?.id === data.hostId,
-                isGoing: data.attendees.some(x => x.id === currentUser?.id)
+                isGoing: data.attendees.some(x => x.id === currentUser?.id),
+                hostImageUrl: host?.imageUrl
             }
         }
     });
@@ -83,12 +87,12 @@ export const useActivities = (id?: string) => {
         onMutate: async (activityId: string) => {
             // 這段 cancelQueries 看起來沒加不會怎麼樣，
             // 因為也沒有觸發 invalidateQuery，並不會去 re fetch activity
-            await queryClient.cancelQueries({ queryKey: ['activities', activityId]});
+            await queryClient.cancelQueries({ queryKey: ['activities', activityId] });
 
             const prevActivity = queryClient.getQueryData<Activity>(['activities', activityId]);
 
             queryClient.setQueryData<Activity>(['activities', activityId], oldActivity => {
-                if(!oldActivity || !currentUser) {
+                if (!oldActivity || !currentUser) {
                     return oldActivity;
                 }
 
@@ -102,7 +106,7 @@ export const useActivities = (id?: string) => {
                         ? isHost
                             ? oldActivity.attendees
                             : oldActivity.attendees.filter(x => x.id !== currentUser.id)
-                        : [ ...oldActivity.attendees, {
+                        : [...oldActivity.attendees, {
                             id: currentUser.id,
                             displayName: currentUser.displayName,
                             imageUrl: currentUser.imageUrl
@@ -115,20 +119,20 @@ export const useActivities = (id?: string) => {
         onError: (error, activityId, context) => {
             console.log("context?.prevActivity", context?.prevActivity);
             console.log(error);
-            if(context?.prevActivity) {
+            if (context?.prevActivity) {
                 queryClient.setQueryData(['activities', activityId], context.prevActivity);
             }
         }
     });
 
-    return { 
-        activities, 
-        isLoading, 
-        updateActivity, 
-        createActivity, 
-        deleteActivity, 
-        activity, 
-        isLoadingActivity, 
-        updateAttendance 
+    return {
+        activities,
+        isLoading,
+        updateActivity,
+        createActivity,
+        deleteActivity,
+        activity,
+        isLoadingActivity,
+        updateAttendance
     };
 }
