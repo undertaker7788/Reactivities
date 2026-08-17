@@ -22,8 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Activities/" />
-    <Folder Include="Activities/Commands/" />
     <Folder Include="Activities/Queries/" />
     <Folder Include="Core/" />
     <Folder Include="Interfaces/" />

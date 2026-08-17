@@ -1,4 +1,5 @@
 using API.Middleware;
+using API.SignalR;
 using Application.Activities.Queries;
 using Application.Activities.Validators;
 using Application.Core;
@@ -28,6 +29,7 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 });
 
 builder.Services.AddCors();
+builder.Services.AddSignalR();
 builder.Services.AddMediatR(x =>
     {
         x.RegisterServicesFromAssemblyContaining<GetActivityList.Handler>();
@@ -90,6 +92,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapGroup("/api").MapIdentityApi<User>();
+app.MapHub<CommentHub>("/comments");
 
 // using 區塊結束後，裡面的東西就會 Dispose
 using var scope = app.Services.CreateScope();
