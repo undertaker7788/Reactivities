@@ -1,5 +1,6 @@
 using System;
 using Application.Activities.DTOs;
+using Application.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
@@ -14,12 +15,14 @@ public class GetActivityList
 
     // Query 可能包含一些查詢參數，屬於 request
     // List<ActivityDto> 是要回傳的 data type，屬於 response
-    public class Handler(AppDbContext context, IMapper mapper) : IRequestHandler<Query, List<ActivityDto>>
+    public class Handler(AppDbContext context, IMapper mapper, IUserAccessor userAccessor) 
+        : IRequestHandler<Query, List<ActivityDto>>
     {
         public async Task<List<ActivityDto>> Handle(Query request, CancellationToken cancellationToken)
         {
             return await context.Activities
-                .ProjectTo<ActivityDto>(mapper.ConfigurationProvider)
+                .ProjectTo<ActivityDto>(mapper.ConfigurationProvider, 
+                    new { currentUserId = userAccessor.GetUserId() })
                 .ToListAsync(cancellationToken);
         }
     }
