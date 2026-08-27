@@ -25,7 +25,8 @@ builder.Services.AddControllers(opt =>
 });
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
-    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+    // opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 builder.Services.AddCors();
@@ -90,9 +91,13 @@ app.UseCors(options => options
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.MapControllers();
 app.MapGroup("/api").MapIdentityApi<User>();
 app.MapHub<CommentHub>("/comments");
+app.MapFallbackToController("Index", "Fallback");
 
 // using 區塊結束後，裡面的東西就會 Dispose
 using var scope = app.Services.CreateScope();
