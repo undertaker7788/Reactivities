@@ -4,10 +4,22 @@ import agent from "../api/agent"
 import { useNavigate } from "react-router"
 import type { RegisterSchema } from "../schemas/registerSchema"
 import { toast } from "react-toastify"
+import type { ChangePasswordSchema } from "../schemas/changePaswordSchema"
 
 export const useAccount = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+
+    const { data: currentUser, isLoading: loadingUserInfo } = useQuery({
+        queryKey: ['user'],
+        queryFn: async () => {
+            const response = await agent.get<User>('/account/user-info');
+            return response.data;
+        },
+        enabled: !queryClient.getQueryData(['user'])
+        // && location.pathname !== '/login'
+        // && location.pathname !== '/register'
+    });
 
     const loginUser = useMutation({
         mutationFn: async (creds: LoginSchema) => {
@@ -57,15 +69,22 @@ export const useAccount = () => {
         }
     });
 
-    const { data: currentUser, isLoading: loadingUserInfo } = useQuery({
-        queryKey: ['user'],
-        queryFn: async () => {
-            const response = await agent.get<User>('/account/user-info');
-            return response.data;
-        },
-        enabled: !queryClient.getQueryData(['user'])
-        // && location.pathname !== '/login'
-        // && location.pathname !== '/register'
+    const changePassword = useMutation({
+        mutationFn: async (data: ChangePasswordSchema) => {
+            await agent.post('/account/change-password', data);
+        }
+    });
+
+    const forgotPassword = useMutation({
+        mutationFn: async (email: string) => {
+            await agent.post('/forgotPassword', { email });
+        }
+    });
+
+    const resetPassword = useMutation({
+        mutationFn: async (data: ResetPassword) => {
+            await agent.post('/resetPassword', data)
+        }
     });
 
     return {
@@ -75,6 +94,9 @@ export const useAccount = () => {
         loadingUserInfo,
         registerUser,
         verifyEmail,
-        resendConfirmationEmail
+        resendConfirmationEmail,
+        changePassword,
+        forgotPassword,
+        resetPassword
     };
 }

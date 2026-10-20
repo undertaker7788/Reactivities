@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
 
-public class AccountController(SignInManager<User> signInManager, 
+public class AccountController(SignInManager<User> signInManager,
     IEmailSender<User> emailSender, IConfiguration config) : BaseApiController
 {
     [AllowAnonymous]
@@ -26,7 +26,7 @@ public class AccountController(SignInManager<User> signInManager,
 
         var result = await signInManager.UserManager.CreateAsync(user, registerDto.Password);
 
-        if(result.Succeeded)
+        if (result.Succeeded)
         {
             await SendConfirmationEmailAsync(user, user.Email);
             return Ok();
@@ -76,14 +76,14 @@ public class AccountController(SignInManager<User> signInManager,
     [HttpGet("user-info")]
     public async Task<ActionResult> GetUserInfo()
     {
-        if(User.Identity?.IsAuthenticated == false)
+        if (User.Identity?.IsAuthenticated == false)
         {
             return NoContent();
         }
 
         var user = await signInManager.UserManager.GetUserAsync(User);
 
-        if(user == null) return Unauthorized();
+        if (user == null) return Unauthorized();
 
         return Ok(new
         {
@@ -100,5 +100,20 @@ public class AccountController(SignInManager<User> signInManager,
         await signInManager.SignOutAsync();
 
         return NoContent();
+    }
+
+    [HttpPost("change-password")]
+    public async Task<ActionResult> ChangePassword(ChangePasswodDto passwodDto)
+    {
+        var user = await signInManager.UserManager.GetUserAsync(User);
+
+        if (user == null) return Unauthorized();
+
+        var result = await signInManager.UserManager
+            .ChangePasswordAsync(user, passwodDto.CurrentPassword, passwodDto.NewPassword);
+        
+        if (result.Succeeded) return Ok();
+
+        return BadRequest(result.Errors.First().Description);
     }
 }
