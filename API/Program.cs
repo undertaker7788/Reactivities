@@ -45,7 +45,7 @@ builder.Services.Configure<ResendClientOptions>(opt =>
 {
     opt.ApiToken = builder.Configuration["Resend:ApiToken"]!;
 });
-// builder.Services.AddTransient<IResend, ResendClient>();
+builder.Services.AddTransient<IResend, ResendClient>();
 builder.Services.AddTransient<IEmailSender<User>, EmailSender>();
 
 builder.Services.AddScoped<IUserAccessor, UserAccessor>();
