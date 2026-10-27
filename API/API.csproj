@@ -17,7 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DTOs/" />
     <Folder Include="Middleware/" />
     <Folder Include="SignalR/" />
   </ItemGroup>
